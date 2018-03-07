@@ -1,0 +1,32 @@
+#!/bin/bash
+
+cd ~/Projects/ds008
+
+# for each bold file in the dataset
+for bold_file in $(find sub??? -name bold.nii.gz) ; do
+
+    # get the directory name from the file
+    bold_dir=$(dirname $bold_file)
+
+
+    # get the pixdims from the current file and save in pixdims
+    # save the first three pixdims, as they are correct
+
+    dims=$(fslinfo $bold_file | grep 'pixdim' | awk '{ print $2, $4, $6 }')
+    #pixdims=$(echo $dims | awk '{ print $2 }')
+    #pixdims="$pixdims $(echo $dims | awk '{ print $4 }')"
+    #pixdims="$pixdims $(echo $dims | awk '{ print $6 }')"
+    #original="$pixdims $(echo $dims | awk '{ print $8 }')"
+    # Add the correct TR to the pixdims
+    #pixdims="$pixdims 2.000000"
+    pixdims="$dims 2.000000"
+    echo "========================================================="
+    echo Running:  fslchpixdim $bold_file $pixdims
+    echo "========================================================="
+
+    #echo "Original pixdims"
+    #echo $dims
+    echo "Corrected pixdims: $pixdims"
+    printf "\n\n"
+done
+
