@@ -1,0 +1,29 @@
+#!/bin/bash
+cd $HOME/Projects
+
+# NOTE: this script only applies to anatomical and functional data from ds008
+
+# check to see if the ds008 directory exists
+if [ -d ds008 ] ; then
+	cd ds008
+	# iterate through subjects in ds008
+	for subject in $(ls -d sub???) ; do
+		mkdir $HOME/Projects/UM/$subject
+		# check to see that the anatomy and BOLD directories exist
+		if [ -d $subject/anatomy ] ; then
+			mkdir $HOME/Projects/UM/$subject/anatomy
+			cp -r $subject/anatomy/ $HOME/Projects/UM/$subject/anatomy
+		fi
+		if [ -d $subject/BOLD ] ; then
+			mkdir $HOME/Projects/UM/$subject/func
+			cp -r $subject/BOLD/ $HOME/Projects/UM/$subject/func
+		fi
+		# if either directory does not exist, print an error message
+        	if [ ! -d $subject/anatomy ] ; then
+			echo -n "anatomy directory does not exist "
+		fi
+		if [ ! -d $subject/BOLD ] ; then
+			echo -n "BOLD directory does not exist "
+		fi
+	done
+fi

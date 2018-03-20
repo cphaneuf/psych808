@@ -1,0 +1,75 @@
+#!/bin/bash
+
+# This script reads the image files of interest, and prints out some
+# information about the scan.
+
+cd ~/Projects/ds008
+
+# Get the list of subjects
+subjects=$(ls -d sub???)
+
+# for each subject in the list of subjects
+for subject in $subjects ; do
+
+    # We run fslinfo on the highres001.nii.gz file for each subject and from
+    # the output we select only those lines that contain the text 'dim' by
+    # using grep, which will select and print only lines with the text that
+    # matches the text pattern given to it.  In this case, it's simply text.
+    # We use awk to put the even number entries in the list into appropriate
+    # variables.  The stuff awk is supposed to do is inside '{ }', the awk
+    # command is 'print', and each column of incoming data on a line is in
+    # a numbered variable; i.e., $1 is the first column, $2 the second, etc.
+    dims=$(fslinfo $subject/anatomy/highres001.nii.gz | grep 'dim')
+    t1_dim1=$(echo $dims | awk  '{ print $2 }')
+    t1_dim2=$(echo $dims | awk  '{ print $4 }')
+    t1_dim3=$(echo $dims | awk  '{ print $6 }')
+    t1_pdim1=$(echo $dims | awk '{ print $10 }')
+    t1_pdim2=$(echo $dims | awk '{ print $12 }')
+    t1_pdim3=$(echo $dims | awk '{ print $14 }')
+
+    # Now we print it nicely.  The first line contains the format, where %8d
+    # says to print the digits into 8 columns, %14s says print a string into
+    # 14 columns.  We do this for both the dims and pdims.
+    printf "%6s %14s     dim1 = %8d    dim2 = %8d    dim3 = %8d\n" \
+           $subject "highres" $t1_dim1 $t1_dim2 $t1_dim3
+    printf "%6s %14s    pdim1 = %8f   pdim2 = %8f   pdim3 = %8f\n" \
+           $subject "highres" $t1_pdim1 $t1_pdim2 $t1_pdim3
+
+    # Repeat for the inplane.nii.gz files
+    dims=$(fslinfo $subject/anatomy/inplane.nii.gz | grep 'dim')
+    t2_dim1=$(echo $dims | awk  '{ print $2 }')
+    t2_dim2=$(echo $dims | awk  '{ print $4 }')
+    t2_dim3=$(echo $dims | awk  '{ print $6 }')
+    t2_pdim1=$(echo $dims | awk '{ print $10 }')
+    t2_pdim2=$(echo $dims | awk '{ print $12 }')
+    t2_pdim3=$(echo $dims | awk '{ print $14 }')
+
+    printf "%6s %14s     dim1 = %8d    dim2 = %8d    dim3 = %8d\n" \
+           $subject "inplane" $t2_dim1 $t2_dim2 $t2_dim3
+    printf "%6s %14s    pdim1 = %8f   pdim2 = %8f   pdim3 = %8f\n" \
+           $subject "inplane" $t2_pdim1 $t2_pdim2 $t2_pdim3
+
+    # Repeat for the functional (bold) files
+    for task in 001 002 ; do
+        for run in 001 002 003 ; do
+        # We are generating the list, and there may be missing data, so
+        # check for the existence of the file before running fslinfo
+        if [ -s $subject/BOLD/task${task}_run${run}/bold.nii.gz ] ; then
+            dims=$(fslinfo $subject/BOLD/task${task}_run${run}/bold.nii.gz | grep 'dim')
+            bold_dim1=$(echo $dims | awk  '{ print $2 }')
+            bold_dim2=$(echo $dims | awk  '{ print $4 }')
+            bold_dim3=$(echo $dims | awk  '{ print $6 }')
+            bold_dim4=$(echo $dims | awk  '{ print $8 }')
+            bold_pdim1=$(echo $dims | awk '{ print $10 }')
+            bold_pdim2=$(echo $dims | awk '{ print $12 }')
+            bold_pdim3=$(echo $dims | awk '{ print $14 }')
+            bold_pdim4=$(echo $dims | awk '{ print $16 }')
+            printf "%6s %14s     dim1 = %8d    dim2 = %8d    dim3 = %8d   dim4 = %8d\n" \
+                   $subject "task${task}_run${run}" $bold_dim1 $bold_dim2 $bold_dim3 $bold_dim4
+            printf "%6s %14s    pdim1 = %8f   pdim2 = %8f   pdim3 = %8f  pdim4 = %8f\n" \
+                   $subject "task${task}_run${run}" $bold_pdim1 $bold_pdim2 $bold_pdim3 $bold_pdim4
+        fi
+        done
+    done
+done
+

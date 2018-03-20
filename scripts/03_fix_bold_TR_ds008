@@ -1,0 +1,43 @@
+#!/bin/bash
+
+cd ~/Projects/ds008
+
+# Get the list of subjects
+subjects=$(ls -d sub???)
+
+# for each subject in the list of subjects
+for subject in $subjects ; do
+# The original version is clearer to understand becuase the idea of first needing to check
+# for the existence of a file is intuitive; explaining a 'for task' and 'for run' nested loop
+# would be easy to explain to a new RA that is unfamilar with find
+    for bold_file in $(find $subject -name bold.nii.gz | sort) ; do
+        # Repeat for the functional (bold) files
+                # We are generating the list
+                dims=$(fslinfo $bold_file | grep 'dim')
+                bold_dim1=$(echo $dims | awk  '{ print $2 }')
+                bold_dim2=$(echo $dims | awk  '{ print $4 }')
+                bold_dim3=$(echo $dims | awk  '{ print $6 }')
+                bold_dim4=$(echo $dims | awk  '{ print $8 }')
+                bold_pdim1=$(echo $dims | awk '{ print $10 }')
+                bold_pdim2=$(echo $dims | awk '{ print $12 }')
+                bold_pdim3=$(echo $dims | awk '{ print $14 }')
+                bold_pdim4=$(echo $dims | awk '{ print $16 }')
+                printf "%6s %14s     dim1 = %8d    dim2 = %8d    dim3 = %8d   dim4 = %8d\n" \
+                $subject "$bold_file" $bold_dim1 $bold_dim2 $bold_dim3 $bold_dim4
+                printf "%6s %14s    pdim1 = %8f   pdim2 = %8f   pdim3 = %8f  pdim4 = %8f\n" \
+                $subject "$bold_file" $bold_pdim1 $bold_pdim2 $bold_pdim3 $bold_pdim4
+
+                # Collect values for first three pixdims, store in a variable, add 2.000000 TR value to the end
+                # and run fslchpixim on each bold file to save values
+
+                # THESE READ THE FILE AGAIN - SLOWER (an alternate option)
+		#pix_dims=$(fslinfo $bold_file | grep 'pixdim1' | awk  '{ print $2 }')
+                #pix_dims="${pix_dims} $(fslinfo $bold_file | grep 'pixdim2' | awk  '{ print $2 }')"
+                #pix_dims="${pix_dims} $(fslinfo $bold_file | grep 'pixdim3' | awk  '{ print $2 }')"
+                #pix_dims="${pix_dims} 2.000000"
+		# fslchpixdim $bold_file $pix_dims
+
+                echo fslchpixdim $bold_file $bold_pdim1 $bold_pdim2 $bold_pdim3 2.000000
+                fslchpixdim $bold_file $bold_pdim1 $bold_pdim2 $bold_pdim3 2.000000
+    done
+done

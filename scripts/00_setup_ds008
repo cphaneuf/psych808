@@ -1,0 +1,35 @@
+#!/bin/bash
+
+# if ds008 exists, quit
+if [ -d ~/Projects/ds008 ] ; then
+	echo "The ds008 folder exists. Please remove it and rerun. Exiting."
+	exit 1
+fi
+
+# if the ds008 folder does not exist, unarchive the dataset
+cd ~/Projects
+tar xzvf /nfs/turbo/arcts-dads-nii-open/classdata/ds008_raw.tgz
+cd ds008/
+
+# remove foo
+rm sub001/behav/foo
+
+# get list of subjects
+subjects=$(ls -d sub???)
+
+for subject in $subjects ; do
+	for task in {01..02} ; do
+		for run in {01..03} ; do
+			rm -r $subject/BOLD/task0${task}_run0$run/QA
+		done
+	done
+	cd $subject/
+	cd anatomy/
+	rm highres001_brain_mask.nii.gz
+	rm highres001_brain.nii.gz
+	rm inplane_brain.nii.gz
+	rm inplane.nii.gz
+	# go back out to ds008
+	cd ..
+	cd ..
+done

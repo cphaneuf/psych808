@@ -1,0 +1,13 @@
+#!/bin/bash
+cd $HOME/Projects/UM
+
+for subject in $(ls -d sub???) ; do
+	# echo -n "$subject" >> output_file
+	tree $subject >> output_file
+	echo -n "printing out directories" >> output_file
+	tree -d $subject >> output_file
+	echo -n "finding directories" >> output_file
+	find $subject -type d
+	echo -n "finding files" >> output_file
+	find $subject -type f
+done

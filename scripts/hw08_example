@@ -1,0 +1,8 @@
+#!/usr/bin/python
+print("Hello, from Python")
+print("Hello, from Python"[0:5])
+myMessage = "Watch out!  I'm going to science the * out of this!"
+print(myMessage)
+print(myMessage[:10])
+print("Python starts indexes at 0!\n" * 3)
+print("Hello..." + " " + "world?  kitty?")

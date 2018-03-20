@@ -1,0 +1,13 @@
+#!/bin/bash
+
+cd ~/Projects/ds008
+
+# get the list of subjects
+subjects=$(ls -d sub???)
+
+for subject in $subjects ; do
+	printf "\n"
+	echo $subject
+	printf "\n"
+	find $subject/BOLD -name bold.nii.gz
+done

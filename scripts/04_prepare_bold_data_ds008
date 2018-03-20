@@ -1,0 +1,32 @@
+#!/bin/bash
+
+cd ~/Projects/ds008
+
+# Get the list of bold_files
+bold_files=$(find sub??? -name bold.nii.gz | sort)
+
+# for each bold_file in the list of bold_files
+for bold_file in $bold_files ; do
+	# get the directory portion from the filename
+	bold_dir=$(dirname $bold_file)
+	# get rid of the old directory, if it exists
+	if [ -d $bold_dir/motion_assess ] ; then
+		rm -r $bold_dir/motion_assess
+	fi
+	mkdir $bold_dir/motion_assess
+	# run fsl_motion_outliers command
+	fsl_motion_outliers -i $bold_file \
+		-o $bold_dir/motion_assess/confound.txt \
+		-s $bold_dir/motion_assess/frame_displacement_vals.txt \
+		-v --fd --thresh=0.9 \
+		-p $bold_dir/motion_assess/fd_plot -v \
+	| tee $bold_dir/motion_assess/outlier_output.txt
+	# if confound.txt doesn't exist, make an empty one
+	if [ ! -e $bold_dir/motion_assess/confound.txt ] ; then
+		touch $bold_dir/motion_assess/confound.txt
+		echo "no motion outliers were found; creating empty counfound.txt file"
+	fi
+done
+
+echo "MOTION ASSESSMENT COMPLETE"
+date

@@ -1,0 +1,32 @@
+#!/bin/bash
+
+projects=$HOME/Projects/ds008
+cd $projects
+
+subjects=$(ls -d sub???)
+
+for subject in $subjects; do
+    cd $projects/$subject/anatomy
+        if [ -s highres001.nii.gz -a -s highres001_brain.nii.gz ] ; then
+        # Create an overlay volume from which to extract rendered slices
+        overlay 1 0 -c highres001.nii.gz 0 100 \
+                       highres001_brain_mask.nii.gz 0 1 \
+                bet_mask_on_T1.nii.gz
+        # Create axial slices at 30%, 40%, 50%, 60%, and 70% from left
+        slicer bet_mask_on_T1.nii.gz \
+            -x 0.3 a1.png -x 0.4 a2.png -x 0.5 a3.png \
+            -x 0.6 a4.png -x 0.7 a5.png
+        # Create coronal slices at 30%, 40%, 50%, 60%, and 70% from back
+        slicer bet_mask_on_T1.nii.gz \
+            -y 0.3 c1.png -y 0.4 c2.png -y 0.5 c3.png \
+            -y 0.6 c4.png -y 0.7 c5.png
+        # Create sagittal slices at 30%, 40%, 50%, 60%, and 70% from bottom
+        slicer bet_mask_on_T1.nii.gz \
+            -z 0.3 s1.png -z 0.4 s2.png -z 0.5 s3.png \
+            -z 0.6 s4.png -z 0.7 s5.png
+        else
+            echo "Missing one of highres001.nii.gz or highres001_brain.nii.gz"
+            echo "Skipping"
+            continue
+        fi
+done

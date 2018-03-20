@@ -1,0 +1,11 @@
+#!/bin/bash
+
+1="~/Projects/ds008/sub001"
+2="~/Projects/ds008/sub002"
+3="~/Projects/ds008/sub003"
+4="~/Projects/ds008/sub004"
+
+echo $1
+echo $2
+echo $3
+echo $4

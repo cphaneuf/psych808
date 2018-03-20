@@ -1,0 +1,91 @@
+#!/bin/bash
+
+echo "
+The scripts for this ds008 project are listed below. Run in order of number (00, 01, 02, etc.).
+"
+echo
+
+echo "--------------"
+echo "00_setup_ds008"
+echo "--------------"
+echo "
+Running this script will expand the ds008_raw.tar.gz file from the archive into the ~/Projects, which
+is where it should be run from. If ds008 already exists, it does not override the present directory.
+"
+echo
+
+echo "-------------------------"
+echo "01_brain_extraction_ds008"
+echo "-------------------------"
+echo "
+Running this script will run the bet to do brain extraction on the highres001.nii.gz anatomical image
+for each and every subject.
+"
+echo
+
+echo "---------------------"
+echo "02_check_images_ds008"
+echo "---------------------"
+echo "
+Running this script allows the header information about the dimensions for:
+	- volumes
+	- slices
+	- voxels
+and the TR for functional time series (bold) files to be printed out. This information is looked for
+and sourced from
+	/anatomy/highres001.nii.gz
+	/BOLD/task???_run???/bold.nii/gz
+"
+echo
+
+echo "--------------------------"
+echo "02_check_images_find_ds008"
+echo "--------------------------"
+echo "
+Running this script will produce the same result as the script above, since they are logically equivalent.
+However, this script uses find to locate the bold.nii.gz files.
+"
+echo
+
+echo "--------------------"
+echo "03_fix_bold_TR_ds008"
+echo "--------------------"
+echo "
+Running this script allows the TRs in the bold files for the ds008 data set to be fixed. It searches the 
+bold file for the values of pixdim1-pixdim3, changes the TR to the correct value of 2.000000 and prints the
+new and old values for the 4 pixdims. It also creates a 00_TR_FIXED file in the same folder as the bold 
+file to serve as an indication that the change in TRs has occurred.
+"
+echo
+
+echo "--------------------------"
+echo "04_prepare_bold_data_ds008"
+echo "--------------------------"
+echo "
+Running this script allows the fsl_motion_outliers command to be run on all of the functional bold files
+in the ds008 data set and creates:
+	- a file with any confound images in it
+	- a frame_displacement_vals.txt file with the framewised displacement measure in it
+	- a frame_displacement_plot.png file
+in a newly created motion_assess folder, within the task/run folder of the bold file being assessed.
+An empty confound.txt file is created even if no confounds are found; design.fsf can always refer to this
+text file.
+"
+echo
+
+echo "---------------------"
+echo "make_bet_slices_ds008"
+echo "---------------------"
+echo "
+This script is written in python and makes the bet slices for subjects in the ds008 dataset.
+"
+echo
+
+echo "-------------------"
+echo "motion_correct_test"
+echo "-------------------"
+echo "
+Formats html text with subject IDs.
+"
+echo
+

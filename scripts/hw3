@@ -1,0 +1,79 @@
+#!/bin/bash
+
+#### Set variables for the root names of the two projects
+ofmri=$HOME/Projects/ds008
+um=$HOME/Projects/UM
+
+# Create the new, UM folder
+
+# This is a handy trick to check whether a folder exists and create if not
+# The || is an 'or', so if the part on the left of it is true, the part on the
+# the right of it will not be done, whereas if the the statement on the left
+# side is false, then the statement on the right side will get done.
+
+test -d $um || mkdir $um
+
+# Change to the Openfmri data
+cd $ofmri
+
+# Get list of subjects
+subjects=$(ls -d sub???)
+
+# Anatomical data first, as that is easier
+
+# Do this once per subject
+for subject in $subjects ; do
+    # Do we have a UM subject folder?  If not, make one
+    test -d $um/$subject || mkdir $um/$subject
+    # if there is an anatomical file...
+    if [ -s $subject/anatomy/highres001.nii.gz ] ; then
+        # first have to make the directory...
+        test -d $um/$subject/anatomy || mkdir -p $um/$subject/anatomy/t2_mprage
+        # Do we really want to overwrite if the highres is already there?
+        # It is a judgement call whether to use the or here or use an if and
+        # alert the user to an existing file.
+	test -s $um/$subject/anatomy/highres001.nii.gz || cp $subject/anatomy/highres001.nii.gz $um/$subject/anatomy/t2_mprage
+    else
+        # We should print information in the case of missing data
+        echo
+        echo "Subject $subject was missing anatomy/highres001.nii.gz"
+        echo
+    fi
+done
+
+# Now the functional files
+#
+# task001 in ds008 is the stop task in UM
+# task002 in ds008 is the conditional stop task in UM
+
+task="stop"
+
+for subject in $subjects ; do
+    # We know there is some missing data
+    # UM only uses two digits for run, so we use only two in our variable
+    for run in {01..03} ; do
+        bold_folder=$subject/BOLD/task001_run0$run
+        run_folder=$um/$subject/func/$task/run_$run
+        if [ -s $bold_folder/bold.nii.gz ] ; then
+            # We have to create the directories first
+            test -d $run_folder || mkdir -p $run_folder
+            cp $bold_folder/bold.nii.gz $run_folder/run_$run.nii.gz
+        fi
+    done
+done
+
+# Second, the condstop, or task002, files
+
+task="condstop"
+
+for subject in $subjects ; do
+    for run in {01..03} ; do
+        bold_folder=$subject/BOLD/task002_run0$run
+        run_folder=$um/$subject/func/$task/run_$run
+        if [ -s $bold_folder/bold.nii.gz ] ; then
+            # We have to create the directories first
+            test -d $run_folder || mkdir -p $run_folder
+            cp $bold_folder/bold.nii.gz $run_folder/run_$run.nii.gz
+        fi
+    done
+done

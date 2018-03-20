@@ -1,0 +1,20 @@
+#!/bin/bash
+
+cd ~/Projects/ds008
+
+# get list of subjects
+subjects=$(ls -d sub???)
+
+echo "Processing starts on "
+date
+
+for subject in $subjects ; do
+	echo "For " $subject " running"
+	bet ~/Projects/ds008/$subject/anatomy/highres001.nii.gz ~/Projects/ds008/$subject/anatomy/highres001_brain.nii.gz -R -m
+	echo "bet highris001.nii.gz highres001_brain.nii.gz -R -m"
+	# if bet succeeds
+	echo "Success"
+done
+
+echo "Processing ends on "
+date
