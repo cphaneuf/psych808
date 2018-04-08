@@ -1,0 +1,83 @@
+#!/usr/bin/python
+
+##### This script will find, for each subject, the names of all the .feat
+##### directories created by the first level feat runs.  It will determine
+##### whether a second level feat run should be done (not if there is only
+##### one run), write the appropriate second level .fsf file for the number
+##### of runs, and finally, it will run feat using that .fsf file.
+
+dataset = 'ds008'
+
+##### Import necessary library functions
+
+# Used to read Bash environment variables
+from os import getenv
+
+# Used to get the correct expansion of ~, last element of path
+from os.path import expanduser, basename
+
+# Used to join directory names into a path with appropriate separator
+# characters, even on Windows.
+from os.path import join as pathjoin
+
+# Import glob for easy wildcard use
+from glob import glob
+
+# Import subprocess and check_output to run feat
+import subprocess
+from subprocess import check_output
+
+# Set the project directory
+project_dir = pathjoin(expanduser('~'), 'Projects')
+
+# Set the data directory
+data_dir = pathjoin(project_dir, dataset)
+
+# Set the template directory
+template_dir = pathjoin(project_dir, 'local', 'share', 'templates',
+                        'feat_level2')
+
+##### End variable declarations
+
+subject_list = glob(pathjoin(data_dir, 'sub???'))
+subject_list.sort()
+
+for subject in subject_list:
+    print(subject)
+    feat_dirs = glob(pathjoin(subject, 'model', '*.feat'))
+    feat_dirs.sort()
+    if len(feat_dirs) < 2:
+         print("    Fewer than two runs:  Skipping.\n")
+         continue
+    feat_level2_template = "ds008_{:d}runs.fsf".format(len(feat_dirs))
+    feat_level2_template = pathjoin(template_dir, feat_level2_template)
+    # format fields are called 'output_dir' and 'feat_runN', where N is the
+    # run number
+    template_file = open(feat_level2_template, 'r')
+    template_text = template_file.read()
+    template_file.close()
+    output_dir = pathjoin(data_dir, basename(subject), 'model', 'task001')
+    print("    output directory:  {}\n".format(output_dir))
+    design_file = pathjoin(data_dir, subject, 'model','task001_level2.fsf')
+    feat_file = open(design_file, 'w')
+    if len(feat_dirs) == 2:
+        feat_file.write(template_text.format(output_dir = output_dir,
+                                             feat_run1 = feat_dirs[0],
+                                             feat_run2 = feat_dirs[1]))
+    elif len(feat_dirs) == 3:
+        feat_file.write(template_text.format(output_dir = output_dir,
+                                             feat_run1 = feat_dirs[0],
+                                             feat_run2 = feat_dirs[1],
+                                             feat_run3 = feat_dirs[2]))
+    else:
+        print("Something went horribly wrong!")
+    feat_file.close()
+
+    feat_output = subprocess.check_output(['feat', design_file])
+    feat_output = feat_output.replace('browser at ', 'browser at\n    ')
+    feat_output = feat_output.replace('browser at ', 'browser at\n')
+    feat_output = feat_output.replace('/nfs/turbo/arcts-dads-nii-open/bennet/', 
+                                      '      ~/Projects')
+    print("    Output from feat")
+    print("    {}".format(feat_output))
+
