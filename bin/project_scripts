@@ -89,3 +89,30 @@ Formats html text with subject IDs.
 "
 echo
 
+echo "------------------------"
+echo "5_run_feat_task001_ds008"
+echo "------------------------"
+echo "
+Running this script completes the first level of FEAT analysis by combining preprocessing with run-level stats. It
+also creates summary images for each individual run.
+"
+echo
+
+echo "------------------------"
+echo "06_run_feat_level2_ds008"
+echo "------------------------"
+echo "
+Running this script completes the level 2, or subject level, FEAT analysis. In other words, it combines runs for each
+subject, creates .feat directories for each run, and outputs .gfeat files (which are summary stats for runs combined
+within a single subject.
+"
+echo
+
+echo "-----------------------"
+echo "07_run_feat_group_ds008"
+echo "-----------------------"
+echo "
+Running this script completes the group level FEAT analysis. In doing so, it combines output from the second level,
+and produces a .gfeat directory for each specified contrast.
+"
+echo

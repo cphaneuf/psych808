@@ -31,7 +31,7 @@ set fmri(sscleanup_yn) 0
 
 # Output directory
 # set fmri(outputdir) "/home/cphaneuf/Projects/ds008/sub005/model/task001"
-set fmri(output_dir) "{output_dir}"
+set fmri(outputdir) "{output_dir}"
 
 # TR(s)
 set fmri(tr) 3

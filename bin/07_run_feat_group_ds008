@@ -1,0 +1,104 @@
+#!/usr/bin/python
+
+##### This script will run the group level analsyes for the four defined
+##### contrasts from the level one analyses.
+
+##### Import necessary library functions
+
+# Used to read Bash environment variables
+from os import getenv
+
+# Used to check whether directory exists
+from os.path import isdir
+
+# Used to get the correct expansion of ~, last element of path
+from os.path import expanduser, basename
+
+# Used to join directory names into a path with appropriate separator
+# characters, even on Windows.
+from os.path import join as pathjoin
+
+# Import glob for easy wildcard use
+from glob import glob
+
+# Import subprocess and check_output to run feat
+import subprocess
+from subprocess import check_output
+from subprocess import CalledProcessError
+
+##### End library imports
+
+##### Variable declarations
+
+dataset = 'ds008'
+
+# Set the real directory to which the project points
+real_dir = '/nfs/turbo/arcts-dads-nii-open/bennet'
+
+# Set the project directory
+project_dir = pathjoin(expanduser('~'), 'Projects')
+
+# Set the data directory
+data_dir = pathjoin(project_dir, dataset)
+
+# Set the template file
+template_file_name = pathjoin(project_dir, 'local', 'share', 'templates',
+                        'feat', 'ds008_group_level.fsf')
+print("Template file is: {}".format(template_file_name))
+
+# Set the contrast list
+
+copes = {'cope1':'go', 'cope2':'stop', 'cope3':'failed_stop',
+          'cope4':'stop_minus_go'}
+contrasts = {'go':'Mean of (go - baseline) > 0',
+             'stop':'Mean of (stop - baseline) > 0',
+             'failed_stop':'Mean of (failed stop - baseline) > 0',
+             'stop_minus_go':'Mean of (stop - go) > 0'}
+
+##### End variable declarations
+
+print("\n====> Checking for existing output directories.")
+
+for cope in sorted(copes.keys()):
+    output_dir = pathjoin(data_dir, 'feat', copes[cope])
+    print("Checking {}.gfeat.  Not there.  OK".format(output_dir))
+    # We choose here to exit the script if it encounters an existing group
+    # level results directory
+    if isdir(output_dir+'.gfeat'):
+        exit("output_dir exists!  Exiting.")
+
+print("\n====> No existing output directories.  Proceeding.")
+
+for cope in sorted(copes.keys()):
+    print("\n====> Processing the '{}' contrast".format(copes[cope]))
+    output_dir = pathjoin(data_dir, 'feat', copes[cope])
+    print("  Reading copes from")
+    print("    {data_dir}/sub???/model/task001.gfeat/{contrast}.feat/stats/cope1.nii.gz".format(data_dir=data_dir, contrast=cope))
+    print("  feat will write results to\n    {}".format(output_dir+'.gfeat'))
+    # read the group level template file into a variable
+    template_file = open(template_file_name, 'r')
+    feat_template = template_file.read()
+    template_file.close()
+
+    design_file_name = output_dir+'.fsf'
+    print("  design_file = {}".format(design_file_name))
+    design_file = open(pathjoin(design_file_name), 'w')
+    design_file.write(feat_template.format(output_dir=output_dir,
+                                           data_dir=data_dir,
+                                           contrast=cope,
+                                           contrast_desc=contrasts[copes[cope]]))
+    design_file.close()
+
+    # create the feat command string
+    feat_command = ['feat', design_file_name]
+    print("  Running {}".format(' '.join(feat_command)))
+    try:
+        feat_output = check_output(feat_command, stderr=subprocess.STDOUT)
+        feat_output = feat_output.replace('browser at ', 'browser at\n    ')
+        feat_output = feat_output.replace('browser at ', 'browser at\n')
+        feat_output = feat_output.replace(real_dir, '      ~/Projects')
+        print("    Output from feat")
+        print("    {}".format(feat_output))
+    except CalledProcessError as err:
+        print(err.output)
+

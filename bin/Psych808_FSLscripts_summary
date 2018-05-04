@@ -1,0 +1,89 @@
+/////////////////////////////
+/// PSYCH 808-015 SCRIPTS ///
+/////////////////////////////
+
+TO REDIRECT OUTPUT WHEN RUNNING SCRIPTS:
+----------------------------------------
+
+echo "$USER: $(date)" > output.file
+
+### Option 1: From command line, send script output and error messages to output file
+script.py > output.file 2>&1
+
+### Option 2: Writes output into a file AND prints in command line while running
+script 2>&1 | tee output.file
+
+FSL NOTES:
+---------
+
+### Can make a contrast over any linear combination, as long as the total sum is 0
+
+### Levels
+Level 1 - individual level
+Level 2 - subject level
+Level '3' - (always referred to as group level)
+- Files in level 3 are representative of the group average (i.e. a group average structural)
+- Iterates over 4 cope images (NOT the subjects!)
+
+FSL PIPELINE:
+-------------
+
+00. Copy ds008 dataset from open fmri 
+
+### Download your data and put it into your data directory
+ds008_archive=/nfs/turbo/arcts-dads-nii-open/classdata/ds008_raw.tgz
+cd $HOME/Projects
+
+### Unzip tarball
+tar xzvf $ds008_archive  
+cd ds008
+
+### Copy data directory to save original raw data and create a new working data file
+cp ds008 ds008-orig
+
+01. Brain extraction (aka skull stripping) from anatomical images
+- Run bet and check mask of extracted brain by overlaying it on anatomical image
+
+01.1 Brain extraction quality check (01_brain_extraction_qc)
+- Quality check needs to be run AFTER the original 01 script because you need to look at 
+the middle slice images in order to see if, for example, chunks of brain are missing after
+skull stripping
+
+01.2 Review bet slices in html page (make_bet_slices_ds008)
+
+02. Check the quality of header information stored with BOLD data
+- Ensure that, overall, header files only contain accurate information (this is often 
+influenced by your scanner/scanning procedures)
+- Confirm accurate dimensions, correct TR 
+- Script uses fslinfo, grep and awk to pull out dimensions
+
+03. Fix any errors in header files
+- Current script corrects TRs from 1 to 2
+
+04. Prepare BOLD data
+- Run motion correction diagnostics (based on frame displacement)
+- Create files that indicate which volumes to exclude
+
+05. Run first level of FEAT analysis
+- Feat "first level" analysis combines preprocessing with run-level stats
+- Creates summary statistics/images for each individual run
+
+06. Subject-level FEAT analysis
+- Feat "second level" combines runs for each subject
+- Creates .feat directories for each run
+- Output is .gfeat - summary statistics for runs combined within a single subject
+
+07. Group level FEAT analysis
+- Takes output from second level and combines into group-level analysis 
+- Produces .gfeat directory for each specified contrast
+
+TO REDIRECT OUTPUT WHEN RUNNING SCRIPTS (PART 2):
+-------------------------------------------------
+
+echo "$USER: $(date)" > output.file
+
+### Option 1: From command line, send script output and error messages to output file 
+script.py > output.file 2>&1
+
+### Option 2: Writes output into a file AND prints in command line while running
+script 2>&1 | tee output.file
